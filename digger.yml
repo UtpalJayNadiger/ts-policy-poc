@@ -1,0 +1,18 @@
+projects:
+  - name: infra
+    dir: .
+    workflow: ts_policy
+
+workflows:
+  ts_policy:
+    plan:
+      steps:
+        - init
+        # 1. Generate plan file
+        - run: terraform plan -out=tfplan -input=false -lock=false
+        # 2. Convert to JSON
+        - run: terraform show -json tfplan > plan.json
+        # 3. Install deps (if running in CI)
+        - run: npm install
+        # 4. Run TypeScript Policy
+        - run: npx ts-node policy/check.ts
